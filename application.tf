@@ -114,23 +114,41 @@ resource "aws_lb" "this" {
   }
 }
 
+resource "aws_lb_target_group" "this" {
+  name     = "cmtr-wz7heak5-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = "cmtr-wz7heak5-vpc"
+
+  health_check {
+    enabled             = true
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+
+  tags = {
+    Terraform = "true"
+    Project   = "cmtr-wz7heak5"
+  }
+}
+
+
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "OK"
-      status_code  = "200"
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.this.arn
   }
 }
-
 resource "aws_autoscaling_attachment" "this" {
   autoscaling_group_name = aws_autoscaling_group.this.name
-  lb_target_group_arn    = aws_lb.this.arn
+  lb_target_group_arn    = aws_lb_target_group.this.arn
 }
