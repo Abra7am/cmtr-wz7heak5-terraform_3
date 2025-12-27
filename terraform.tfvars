@@ -6,3 +6,5 @@ public_subnets = [
   "subnet-10.0.1.0/24",
   "subnet-10.0.3.0/24"
 ]
+
+vpc_id = "vpc-0682aba8ffb511f80"
