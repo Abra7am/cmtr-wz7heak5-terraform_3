@@ -162,4 +162,8 @@ resource "aws_autoscaling_group" "this" {
 resource "aws_autoscaling_attachment" "this" {
   autoscaling_group_name = aws_autoscaling_group.this.name
   lb_target_group_arn    = aws_lb_target_group.this.arn
+
+  depends_on = [
+    aws_lb_listener.http
+  ]
 }
