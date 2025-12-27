@@ -1,19 +1,24 @@
 variable "aws_region" {
-  description = "AWS region where resources will be deployed"
+  description = "AWS region"
   type        = string
 }
 
 variable "project_id" {
-  description = "Project identifier used for resource tagging"
+  description = "Project identifier"
   type        = string
 }
 
 variable "ssh_key_name" {
-  description = "SSH key pair name for EC2 instances"
+  description = "SSH key pair name"
   type        = string
 }
 
 variable "public_subnets" {
-  description = "List of public subnet IDs for ALB and Auto Scaling Group"
+  description = "Public subnet IDs"
   type        = list(string)
+}
+
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
 }
