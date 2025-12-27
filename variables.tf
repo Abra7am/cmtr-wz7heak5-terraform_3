@@ -13,11 +13,6 @@ variable "ssh_key_name" {
   type        = string
 }
 
-variable "public_subnets" {
-  description = "Public subnet IDs"
-  type        = list(string)
-}
-
 variable "vpc_id" {
   description = "VPC ID"
   type        = string

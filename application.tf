@@ -1,3 +1,13 @@
+############################################
+# Provider
+############################################
+provider "aws" {
+  region = var.aws_region
+}
+
+############################################
+# Data sources (pre-created resources)
+############################################
 data "aws_security_group" "lb" {
   name = "cmtr-wz7heak5-sglb"
 }
@@ -10,12 +20,12 @@ data "aws_security_group" "http" {
   name = "cmtr-wz7heak5-http_sg"
 }
 
+data "aws_subnet" "public_a" {
+  cidr_block = "10.0.1.0/24"
+}
 
-############################################
-# Provider
-############################################
-provider "aws" {
-  region = var.aws_region
+data "aws_subnet" "public_b" {
+  cidr_block = "10.0.3.0/24"
 }
 
 ############################################
@@ -24,8 +34,13 @@ provider "aws" {
 resource "aws_lb" "this" {
   name               = "cmtr-wz7heak5-loadbalancer"
   load_balancer_type = "application"
-  security_groups    = ["cmtr-wz7heak5-sglb"]
-  subnets            = var.public_subnets
+
+  security_groups = [data.aws_security_group.lb.id]
+
+  subnets = [
+    data.aws_subnet.public_a.id,
+    data.aws_subnet.public_b.id
+  ]
 
   tags = {
     Terraform = "true"
@@ -43,7 +58,6 @@ resource "aws_lb_target_group" "this" {
   vpc_id   = var.vpc_id
 
   health_check {
-    enabled             = true
     path                = "/"
     matcher             = "200-399"
     interval            = 30
@@ -59,7 +73,7 @@ resource "aws_lb_target_group" "this" {
 }
 
 ############################################
-# ALB Listener
+# Listener
 ############################################
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
@@ -77,7 +91,7 @@ resource "aws_lb_listener" "http" {
 ############################################
 resource "aws_launch_template" "this" {
   name_prefix   = "cmtr-wz7heak5-template"
-  image_id      = "ami-068c0051b15cdb816"
+  image_id      = "ami-09e6f87a47903347c"
   instance_type = "t3.micro"
   key_name      = var.ssh_key_name
 
@@ -87,11 +101,12 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = true
+    delete_on_termination       = true
+
     security_groups = [
-      "cmtr-wz7heak5-ec2_sg",
-      "cmtr-wz7heak5-http_sg"
+      data.aws_security_group.ec2.id,
+      data.aws_security_group.http.id
     ]
-    delete_on_termination = true
   }
 
   metadata_options {
@@ -103,7 +118,6 @@ resource "aws_launch_template" "this" {
     #!/bin/bash
     yum update -y
     yum install -y httpd aws-cli jq
-
     systemctl enable httpd
     systemctl start httpd
 
@@ -116,13 +130,8 @@ resource "aws_launch_template" "this" {
     PRIVATE_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" \
       http://169.254.169.254/latest/meta-data/local-ipv4)
 
-    cat <<HTML > /var/www/html/index.html
-    <html>
-      <body>
-        <h1>This message was generated on instance $INSTANCE_ID with the following IP: $PRIVATE_IP</h1>
-      </body>
-    </html>
-    HTML
+    echo "This message was generated on instance $INSTANCE_ID with the following IP: $PRIVATE_IP" \
+      > /var/www/html/index.html
   EOF
   )
 
@@ -140,9 +149,13 @@ resource "aws_autoscaling_group" "this" {
   desired_capacity          = 2
   min_size                  = 1
   max_size                  = 2
-  vpc_zone_identifier       = var.public_subnets
   health_check_type         = "EC2"
   health_check_grace_period = 300
+
+  vpc_zone_identifier = [
+    data.aws_subnet.public_a.id,
+    data.aws_subnet.public_b.id
+  ]
 
   launch_template {
     id      = aws_launch_template.this.id
