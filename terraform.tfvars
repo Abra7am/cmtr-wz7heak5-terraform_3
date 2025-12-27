@@ -1,5 +1,5 @@
 aws_region   = "us-east-1"
-project_id  = "cmtr-wz7heak5"
+project_id   = "cmtr-wz7heak5"
 ssh_key_name = "cmtr-wz7heak5-keypair"
 
 public_subnets = [
