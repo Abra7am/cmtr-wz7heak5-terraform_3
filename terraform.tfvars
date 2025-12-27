@@ -1,5 +1,8 @@
-aws_region = "us-east-1"
-project_id = "cmtr-wz7heak5"
+aws_region   = "us-east-1"
+project_id  = "cmtr-wz7heak5"
+ssh_key_name = "cmtr-wz7heak5-keypair"
 
-state_bucket = "cmtr-wz7heak5-tf-state-1766852185"
-state_key    = "infra.tfstate"
+public_subnets = [
+  "subnet-10.0.1.0/24",
+  "subnet-10.0.3.0/24"
+]
