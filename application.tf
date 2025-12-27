@@ -61,10 +61,12 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_autoscaling_group" "this" {
-  name             = "cmtr-wz7heak5-asg"
-  desired_capacity = 2
-  min_size         = 1
-  max_size         = 2
+  name                      = "cmtr-wz7heak5-asg"
+  desired_capacity          = 2
+  min_size                  = 1
+  max_size                  = 2
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
 
   vpc_zone_identifier = [
     "subnet-10.0.1.0/24",
@@ -124,11 +126,11 @@ resource "aws_lb_target_group" "this" {
     enabled             = true
     path                = "/"
     protocol            = "HTTP"
-    matcher             = "200"
+    matcher             = "200-399"
     interval            = 30
-    timeout             = 5
+    timeout             = 15
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 5
   }
 
   tags = {
