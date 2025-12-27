@@ -1,3 +1,16 @@
+data "aws_security_group" "lb" {
+  name = "cmtr-wz7heak5-sglb"
+}
+
+data "aws_security_group" "ec2" {
+  name = "cmtr-wz7heak5-ec2_sg"
+}
+
+data "aws_security_group" "http" {
+  name = "cmtr-wz7heak5-http_sg"
+}
+
+
 ############################################
 # Provider
 ############################################
