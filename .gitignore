@@ -1,19 +1,9 @@
-# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
-
-# Variable files (may contain secrets)
-*.tfvars
-*.tfvars.json
-
-# Logs
 crash.log
 crash.*.log
-
-# OS / Editor
 .DS_Store
 .idea/
 .vscode/
-

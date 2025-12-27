@@ -1,18 +1,19 @@
 variable "aws_region" {
-  description = "AWS region"
+  description = "AWS region for resources"
   type        = string
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
+variable "project_id" {
+  description = "Project identifier for tagging"
   type        = string
 }
 
-variable "public_subnets" {
-  description = "Public subnet configurations"
-  type = map(object({
-    cidr_block = string
-    az         = string
-    name       = string
-  }))
+variable "state_bucket" {
+  description = "S3 bucket name for remote Terraform state"
+  type        = string
+}
+
+variable "state_key" {
+  description = "S3 key path for remote Terraform state file"
+  type        = string
 }
